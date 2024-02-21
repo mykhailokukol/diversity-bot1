@@ -1,4 +1,3 @@
-import certifi
 from pymongo.mongo_client import MongoClient
 from telegram import (
     InlineKeyboardMarkup,
@@ -39,7 +38,7 @@ async def start(
     context: ContextTypes.DEFAULT_TYPE,
 ) -> int:
 
-    client = MongoClient(settings.MONGODB_CLIENT_URL, tlsCAFile=certifi.where())
+    client = MongoClient(settings.MONGODB_CLIENT_URL, ssl=False)
     db = client["empirepartnersbot"]
     winners = db["winners"]
     if winners.find_one({"user_id": update.effective_user.id}):
@@ -220,7 +219,7 @@ async def check_subscription(
         context.user_data["participation"] = update.message.text
 
     # Check for rewards availability
-    client = MongoClient(settings.MONGODB_CLIENT_URL, tlsCAFile=certifi.where())
+    client = MongoClient(settings.MONGODB_CLIENT_URL, ssl=False)
     db = client["empirepartnersbot"]
     rewards = db["rewards"]
     for reward in rewards.find():
@@ -292,7 +291,7 @@ async def set_reward(
         case "phone cardholder":
             winner["reward"] = "кардхолдер"
 
-    client = MongoClient(settings.MONGODB_CLIENT_URL, tlsCAFile=certifi.where())
+    client = MongoClient(settings.MONGODB_CLIENT_URL, ssl=False)
     db = client["empirepartnersbot"]
     winners = db["winners"]
     winners.insert_one(winner)
