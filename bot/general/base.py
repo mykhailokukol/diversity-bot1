@@ -15,6 +15,8 @@ from bot.general.keyboards import (
     choose_action_keyboard2,
     choose_action_keyboard2_ru,
     language_keyboard,
+    participation_keyboard,
+    participation_keyboard_ru,
     set_geo_keyboard,
     set_geo_keyboard_ru,
     set_reward_keyboard,
@@ -28,7 +30,7 @@ from bot.general.keyboards import (
 #             text = ""
 
 
-ACTION, NICKNAME, GEO, SOURCE, VOLUME, CHECK_SUB, REWARD = range(7)
+ACTION, NICKNAME, GEO, SOURCE, VOLUME, PARTICIPATE, CHECK_SUB, REWARD = range(8)
 
 
 async def start(
@@ -167,6 +169,28 @@ async def set_volume(
         reply_markup=reply_markup,
     )
 
+    return PARTICIPATE
+
+
+async def participation(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+) -> int:
+    context.user_data["volume"] = update.message.text
+    match context.user_data["localization"]:
+        case "Русский":
+            text = "Вы хотите принять участие в RS Affiliate Tournament - арбитражном турнире с призовым фондом $300 000?"
+            keyboard = participation_keyboard_ru
+        case "English":
+            text = "Do you want to take part in the RS Affiliate Tournament - an arbitrage tournament with a prize pool of $300,000?"
+            keyboard = participation_keyboard
+
+    reply_markup = ReplyKeyboardMarkup(keyboard)
+    await update.message.reply_text(
+        text,
+        reply_markup=reply_markup,
+    )
+
     return CHECK_SUB
 
 
@@ -192,7 +216,7 @@ async def check_subscription(
             set_reward_keyboard_localizated = set_reward_keyboard
 
     if update.message.text.lower() not in ["готово", "done"]:
-        context.user_data["volume"] = update.message.text
+        context.user_data["participation"] = update.message.text
 
     # Check for rewards availability
     client = MongoClient(settings.MONGODB_CLIENT_URL)

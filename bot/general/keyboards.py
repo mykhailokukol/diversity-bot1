@@ -37,6 +37,13 @@ set_reward_keyboard_ru = [
     ]
 ]
 
+participation_keyboard_ru = [
+    [
+        InlineKeyboardButton("Да"),
+        InlineKeyboardButton("Нет"),
+    ]
+]
+
 # ========================================= ENGLISH ===================================
 
 choose_action_keyboard1 = [
@@ -66,5 +73,12 @@ set_reward_keyboard = [
         InlineKeyboardButton("Shopper"),
         InlineKeyboardButton("Keychain"),
         InlineKeyboardButton("Phone Cardholder"),
+    ]
+]
+
+participation_keyboard = [
+    [
+        InlineKeyboardButton("Yes"),
+        InlineKeyboardButton("No"),
     ]
 ]

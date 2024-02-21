@@ -14,12 +14,14 @@ from bot.general.base import (
     CHECK_SUB,
     GEO,
     NICKNAME,
+    PARTICIPATE,
     REWARD,
     SOURCE,
     VOLUME,
     cancel,
     check_subscription,
     choose_action,
+    participation,
     set_geo,
     set_nickname,
     set_reward,
@@ -45,6 +47,9 @@ def main() -> None:
             GEO: [MessageHandler(filters.TEXT & ~filters.COMMAND, set_geo)],
             SOURCE: [MessageHandler(filters.TEXT & ~filters.COMMAND, set_source)],
             VOLUME: [MessageHandler(filters.TEXT & ~filters.COMMAND, set_volume)],
+            PARTICIPATE: [
+                MessageHandler(filters.TEXT & ~filters.COMMAND, participation)
+            ],
             CHECK_SUB: [
                 MessageHandler(filters.TEXT & ~filters.COMMAND, check_subscription)
             ],
