@@ -40,7 +40,7 @@ async def start(
     context: ContextTypes.DEFAULT_TYPE,
 ) -> int:
 
-    client = MongoClient(settings.MONGODB_CLIENT_URL)
+    client = MongoClient(settings.MONGODB_CLIENT_URL, connect=False)
     db = client["empirepartnersbot"]
     winners = db["winners"]
     if winners.find_one({"user_id": update.effective_user.id}):
@@ -181,10 +181,10 @@ async def participation(
     context.user_data["volume"] = update.message.text
     match context.user_data["localization"]:
         case "Русский":
-            text = "Вы хотите принять участие в RS Affiliate Tournament - арбитражном турнире с призовым фондом $300 000?"
+            text = "Вы хотите принять участие в RevShare Affiliate Tournament - арбитражном турнире с призовым фондом $300 000?"
             keyboard = participation_keyboard_ru
         case "English":
-            text = "Do you want to take part in the RS Affiliate Tournament - an arbitrage tournament with a prize pool of $300,000?"
+            text = "Do you want to take part in the RevShare Affiliate Tournament - an arbitrage tournament with a prize pool of $300,000?"
             keyboard = participation_keyboard
 
     reply_markup = ReplyKeyboardMarkup(keyboard)
@@ -221,7 +221,7 @@ async def check_subscription(
         context.user_data["participation"] = update.message.text
 
     # Check for rewards availability
-    client = MongoClient(settings.MONGODB_CLIENT_URL)
+    client = MongoClient(settings.MONGODB_CLIENT_URL, connect=False)
     db = client["empirepartnersbot"]
     rewards = db["rewards"]
     for reward in rewards.find():
@@ -248,10 +248,18 @@ async def check_subscription(
         check_text,
         reply_markup=reply_markup,
     )
-
-    chat_member = await context.bot.get_chat_member(
-        chat_id=settings.CHANNEL_NAME, user_id=update.effective_user.id
-    )
+    try:
+        chat_member = await context.bot.get_chat_member(
+            chat_id=settings.CHANNEL_NAME, user_id=update.effective_user.id
+        )
+    except TelegramError as e:
+        print(e)
+        reply_markup = ReplyKeyboardRemove()
+        await update.message.reply_text(
+            fail_text,
+            reply_markup=reply_markup,
+        )
+        return CHECK_SUB
     if chat_member.status in ["member", "administartor", "creator"]:
         success_reply_markup = ReplyKeyboardMarkup(set_reward_keyboard_localizated)
         await update.message.reply_text(
@@ -282,6 +290,7 @@ async def set_reward(
         "source": context.user_data["source"],
         "volume": context.user_data["volume"],
         "reward": context.user_data["reward"],
+        "participation": context.user_data["participation"],
     }
     winner["reward"] = winner["reward"].lower()
 
@@ -293,7 +302,7 @@ async def set_reward(
         case "phone cardholder":
             winner["reward"] = "кардхолдер"
 
-    client = MongoClient(settings.MONGODB_CLIENT_URL)
+    client = MongoClient(settings.MONGODB_CLIENT_URL, connect=False)
     db = client["empirepartnersbot"]
     winners = db["winners"]
     winners.insert_one(winner)
